@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { Vibration, View, Text, Pressable, TextInput } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -49,11 +50,34 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
+    
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
+    <View style={{ flex: 1, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center'  }}>
+             <Text style={{ fontFamily: 'SpaceMono', fontSize: 40, color: '#000'  }}>
+              Informe Seu User Do Github
+            </Text>
+            <TextInput style={{ height: 50, borderColor: 'gray', borderWidth: 1, width: '50%', marginTop: 30, paddingLeft: 20 , borderRadius: 12}} 
+            placeholder="Digite seu Email" />
+
+<TextInput style={{ height: 50, borderColor: 'gray', borderWidth: 1, width: '50%', marginTop: 30, paddingLeft: 20 , borderRadius: 12}} 
+            placeholder="Digite seu Senha" />
+
+<Pressable 
+
+  style={{ justifyContent: 'space-between', width: '50%',borderWidth:1, 
+  boxShadow: '15px 14px 10px rgba(0, 0, 0, 0.85)',
+   padding: 15, marginTop: 20, borderColor: '#fff', 
+   borderRadius: 30, backgroundColor: '#000' }}>
+
+  <Text style={{ color: '#fff', textAlign: 'center' }}>
+Entrar
+  </Text>
+</Pressable>
+    
+
+</View>
+
     </ThemeProvider>
   );
 }
+
