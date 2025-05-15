@@ -1,63 +1,33 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
-
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import { Tabs } from "expo-router";
+import { Zocial } from "@expo/vector-icons"; // Importa o ícone Zocial
+import Colors from "@/constants/Colors";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
-    screenOptions={{
-      tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-      tabBarStyle: {
-        backgroundColor: 'black', // Define o fundo da barra como preto
-      },
-      // Disable the static render of the header on web
-      // to prevent a hydration error in React Navigation v6.
-      headerShown: useClientOnlyValue(false, true),
-      }}>
+      screenOptions={{
+        tabBarActiveTintColor: Colors.light.tint,
+        tabBarStyle: {
+          backgroundColor: "black",
+        },
+        headerShown: false,
+      }}
+    >
+      {/* Aba de Repositórios */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'home',
-          headerTitleStyle: {
-            color: '#fff'
-        },
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+          title: "Repositórios",
+          tabBarIcon: ({ color }) => <Zocial name="github" size={24} color={color} />, // Ícone para a aba de repositórios
         }}
       />
+
+      {/* Aba de Perfil */}
       <Tabs.Screen
         name="perfilo"
         options={{
-          title: 'perfil',
-          tabBarIcon: ({ color }) => <TabBarIcon name="user-circle" color={color} />,
+          title: "Perfil",
+          tabBarIcon: ({ color }) => <Zocial name="github" size={24} color={color} />, // Ícone para a aba de perfil
         }}
       />
     </Tabs>
