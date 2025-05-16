@@ -15,7 +15,7 @@ export default function TabLayout() {
     >
       {/* Aba de Repositórios */}
       <Tabs.Screen
-        name="index"
+        name="repo"
         options={{
           title: "Repositórios",
           tabBarIcon: ({ color }) => <Zocial name="github" size={24} color={color} />, // Ícone para a aba de repositórios
@@ -24,7 +24,7 @@ export default function TabLayout() {
 
       {/* Aba de Perfil */}
       <Tabs.Screen
-        name="perfilo"
+        name="perfil"
         options={{
           title: "Perfil",
           tabBarIcon: ({ color }) => <Zocial name="github" size={24} color={color} />, // Ícone para a aba de perfil

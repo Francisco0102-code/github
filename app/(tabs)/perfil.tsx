@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Image, ActivityIndicator, Pressable } from "rea
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
+
 export interface IUserResponse {
   login: string;
   id: number;
@@ -31,6 +32,9 @@ export default function Perfilo() {
         const storedUsername = await AsyncStorage.getItem("@username");
         if (!storedUsername) {
           throw new Error("Usuário não encontrado no AsyncStorage");
+          Headers:{
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+          }
         }
 
         const response = await fetch(`https://api.github.com/users/${storedUsername}`);

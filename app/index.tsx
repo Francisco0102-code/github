@@ -21,7 +21,7 @@ import {
         try {
           const storedUsername = await AsyncStorage.getItem("@username");
           if (storedUsername) {
-            route.push("/(tabs)");
+            route.push("/(tabs)/perfil");
           } else {
             setIsChecking(false);
           }
@@ -38,7 +38,7 @@ import {
       try {
         await AsyncStorage.setItem("@username", username.trim());
         setUsername(username.trim());
-        route.replace("/(tabs)");
+        route.replace("/(tabs)/repo");
       } catch (e) {
         Alert.alert("Erro", "Erro ao salvar");
       }
