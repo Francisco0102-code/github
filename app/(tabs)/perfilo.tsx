@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Image, ActivityIndicator, Pressable } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 
 export interface IUserResponse {
   login: string;
@@ -9,40 +10,46 @@ export interface IUserResponse {
   html_url: string;
   name: string;
   bio: string;
-  url: string;
   followers: number;
   following: number;
   public_repos: number;
-  public_gists: number;
 }
 
 export default function Perfilo() {
-  const { username } = useLocalSearchParams(); // Obtém o nome de usuário enviado como parâmetro
-  const router = useRouter(); // Inicializa o router para navegação
   const [user, setUser] = useState<IUserResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const sair = async () => {
+    await AsyncStorage.removeItem("@username");
+    router.replace("/");
+  }
 
   useEffect(() => {
-    async function fetchUser() {
-      if (!username) return; // Verifica se o nome de usuário foi fornecido
-
+    const fetchUser = async () => {
       try {
-        const response = await fetch(`https://api.github.com/users/${username}`);
-        if (response.ok) {
-          const data: IUserResponse = await response.json();
-          setUser(data);
-        } else {
-          console.error("Usuário não encontrado.");
+        const storedUsername = await AsyncStorage.getItem("@username");
+        if (!storedUsername) {
+          throw new Error("Usuário não encontrado no AsyncStorage");
         }
-      } catch (error) {
-        console.error("Erro ao buscar os dados do usuário:", error);
+
+        const response = await fetch(`https://api.github.com/users/${storedUsername}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Erro ao buscar dados do usuário");
+        }
+
+        setUser(data);
+      } catch (error: any) {
+        console.error("Erro:", error.message);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchUser();
-  }, [username]);
+  }, []);
 
   if (loading) {
     return (
@@ -76,8 +83,7 @@ export default function Perfilo() {
         Seguidores: {user.followers} | Seguindo: {user.following}
       </Text>
 
-      {/* Botão Sair */}
-      <Pressable style={styles.button} onPress={() => router.push("/(tabs)")}>
+      <Pressable style={styles.button} onPress={sair}>
         <Text style={styles.buttonText}>Sair</Text>
       </Pressable>
     </View>

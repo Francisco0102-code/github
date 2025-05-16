@@ -2,27 +2,29 @@ import { StyleSheet, FlatList, ActivityIndicator } from "react-native";
 import { Text, View } from "@/components/Themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
+import { isLoaded } from "expo-font";
 
 export default function TabOneScreen() {
   const [repo, setRepos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
+  const [isloggeed, setIsLogged] = useState(true);
 
   useEffect(() => {
     const fetchRepos = async () => {
       try {
         const storedUsername = await AsyncStorage.getItem("@username");
         if (!storedUsername) {
+          setIsLogged(false)
           throw new Error("Usuário não encontrado no AsyncStorage");
         }
 
         setUsername(storedUsername);
 
         const response = await fetch(
-          `https://api.github.com/users/${storedUsername}/repo`
+          `https://api.github.com/users/${storedUsername}/repos`
         );
         const data = await response.json();
-
         if (!response.ok) {
           throw new Error(data.message || "Erro ao buscar repositórios");
         }
@@ -36,7 +38,13 @@ export default function TabOneScreen() {
     };
 
     fetchRepos();
-  }, []);
+
+    return () => {
+      setRepos([]);
+      setLoading(false);
+      setIsLogged(false);
+    }
+  }, [isloggeed, username]);
 
   return (
     <View style={styles.container}>
