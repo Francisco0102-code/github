@@ -1,8 +1,8 @@
-import { StyleSheet, FlatList, ActivityIndicator } from "react-native";
+import { StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/Themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { isLoaded } from "expo-font";
+import { Linking } from "react-native";
 
 export default function TabOneScreen() {
   const [repo, setRepos] = useState<any[]>([]);
@@ -15,7 +15,7 @@ export default function TabOneScreen() {
       try {
         const storedUsername = await AsyncStorage.getItem("@username");
         if (!storedUsername) {
-          setIsLogged(false)
+          setIsLogged(false);
           throw new Error("Usuário não encontrado no AsyncStorage");
         }
 
@@ -43,8 +43,14 @@ export default function TabOneScreen() {
       setRepos([]);
       setLoading(false);
       setIsLogged(false);
-    }
+    };
   }, [isloggeed, username]);
+
+  const openRepo = (url: string) => {
+    Linking.openURL(url).catch((err) =>
+      console.error("Erro ao abrir o link:", err)
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -63,12 +69,16 @@ export default function TabOneScreen() {
           data={repo}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.repoItem}>
+            <TouchableOpacity
+              style={styles.repoItem}
+              onPress={() => openRepo(item.html_url)}
+            >
               <Text style={styles.repoName}>{item.name}</Text>
               <Text style={styles.repoDesc}>
                 {item.description || "Sem descrição"}
               </Text>
-            </View>
+              <Text style={styles.repoStars}>⭐ {item.stargazers_count} estrelas</Text>
+            </TouchableOpacity>
           )}
         />
       )}
@@ -105,5 +115,10 @@ const styles = StyleSheet.create({
   repoDesc: {
     fontSize: 14,
     fontStyle: "italic",
+  },
+  repoStars: {
+    fontSize: 14,
+    marginTop: 5,
+    color: "#555",
   },
 });

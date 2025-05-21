@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Image, ActivityIndicator, Pressable } from "react-native";
+import { StyleSheet, View, Text, Image, ActivityIndicator, Pressable, Share, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-
 
 export interface IUserResponse {
   login: string;
@@ -24,17 +23,41 @@ export default function Perfilo() {
   const sair = async () => {
     await AsyncStorage.removeItem("@username");
     router.replace("/");
-  }
+  };
 
+  const compartilharPerfil = async () => {
+    if (user) {
+      try {
+        const result = await Share.share({
+          message: `Confira o perfil de ${user.name || user.login} no GitHub: ${user.html_url}`,
+          url: user.html_url, // Compatível com algumas plataformas
+          title: `Perfil de ${user.name || user.login}`,
+        });
+  
+        if (result.action === Share.sharedAction) {
+          if (result.activityType) {
+            console.log("Compartilhado com o tipo de atividade:", result.activityType);
+          } else {
+            console.log("Perfil compartilhado com sucesso!");
+          }
+        } else if (result.action === Share.dismissedAction) {
+          console.log("Compartilhamento cancelado.");
+        }
+      } catch (error: any) {
+        console.error("Erro ao compartilhar:", error.message);
+        Alert.alert("Erro", "Não foi possível compartilhar o perfil.");
+      }
+    } else {
+      console.error("Usuário não encontrado para compartilhar.");
+      Alert.alert("Erro", "Usuário não encontrado para compartilhar.");
+    }
+  };
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const storedUsername = await AsyncStorage.getItem("@username");
         if (!storedUsername) {
           throw new Error("Usuário não encontrado no AsyncStorage");
-          Headers:{
-            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`
-          }
         }
 
         const response = await fetch(`https://api.github.com/users/${storedUsername}`);
@@ -90,6 +113,10 @@ export default function Perfilo() {
       <Pressable style={styles.button} onPress={sair}>
         <Text style={styles.buttonText}>Sair</Text>
       </Pressable>
+
+      <Pressable style={styles.shareButton} onPress={compartilharPerfil}>
+        <Text style={styles.buttonText}>Compartilhar Perfil</Text>
+      </Pressable>
     </View>
   );
 }
@@ -137,6 +164,13 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     backgroundColor: "#000",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  shareButton: {
+    marginTop: 10,
+    backgroundColor: "#007bff",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
