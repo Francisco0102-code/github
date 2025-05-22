@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Image, ActivityIndicator, Pressable, Share, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { Platform } from "react-native";
+
 
 export interface IUserResponse {
   login: string;
@@ -24,32 +26,57 @@ export default function Perfilo() {
     await AsyncStorage.removeItem("@username");
     router.replace("/");
   };
-
   const compartilharPerfil = async () => {
     if (user) {
-      try {
-        const result = await Share.share({
-          message: `Confira o perfil de ${user.name || user.login} no GitHub: ${user.html_url}`,
-          url: user.html_url, // Compatível com algumas plataformas
-          title: `Perfil de ${user.name || user.login}`,
-        });
-  
-        if (result.action === Share.sharedAction) {
-          if (result.activityType) {
-            console.log("Compartilhado com o tipo de atividade:", result.activityType);
-          } else {
-            console.log("Perfil compartilhado com sucesso!");
+      if (Platform.OS === "web") {
+        // Compartilhamento na web
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `Perfil de ${user.name || user.login}`,
+              text: `Confira o perfil de ${user.name || user.login} no GitHub:`,
+              url: user.html_url,
+            });
+          } catch (error) {
+            console.error("Erro ao compartilhar:", error);
+            Alert.alert("Erro", "Não foi possível compartilhar o perfil.");
           }
-        } else if (result.action === Share.dismissedAction) {
-          console.log("Compartilhamento cancelado.");
+        } else {
+          copiarLink(); // Fallback para copiar o link
         }
-      } catch (error: any) {
-        console.error("Erro ao compartilhar:", error.message);
-        Alert.alert("Erro", "Não foi possível compartilhar o perfil.");
+      } else {
+        // Compartilhamento em dispositivos móveis
+        try {
+          const result = await Share.share({
+            message: `Confira o perfil de ${user.name || user.login} no GitHub: ${user.html_url}`,
+          });
+          if (result.action === Share.sharedAction) {
+            console.log("Perfil compartilhado com sucesso!");
+          } else if (result.action === Share.dismissedAction) {
+            console.log("Compartilhamento cancelado.");
+          }
+        } catch (error) {
+          console.error("Erro ao compartilhar:", error);
+          Alert.alert("Erro", "Não foi possível compartilhar o perfil.");
+        }
       }
     } else {
       console.error("Usuário não encontrado para compartilhar.");
       Alert.alert("Erro", "Usuário não encontrado para compartilhar.");
+    }
+  };
+  const copiarLink = async () => {
+    if (user) {
+      try {
+        await navigator.clipboard.writeText(user.html_url);
+        Alert.alert("Sucesso", "Link do perfil copiado para a área de transferência!");
+      } catch (error) {
+        console.error("Erro ao copiar o link:", error);
+        Alert.alert("Erro", "Não foi possível copiar o link.");
+      }
+    } else {
+      console.error("Usuário não encontrado para copiar o link.");
+      Alert.alert("Erro", "Usuário não encontrado para copiar o link.");
     }
   };
   useEffect(() => {
@@ -115,7 +142,9 @@ export default function Perfilo() {
       </Pressable>
 
       <Pressable style={styles.shareButton} onPress={compartilharPerfil}>
-        <Text style={styles.buttonText}>Compartilhar Perfil</Text>
+        <Text style={styles.buttonText}>{
+            Platform.OS === "web" ? "Copiar Perfil" : "Compartilhar Perfil"
+          }</Text>
       </Pressable>
     </View>
   );
@@ -181,3 +210,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+function copiarLink() {
+  throw new Error("Function not implemented.");
+}
